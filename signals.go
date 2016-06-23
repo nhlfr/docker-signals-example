@@ -14,9 +14,17 @@ func main() {
 	signal.Notify(signalChan, syscall.SIGHUP)
 
 	go func() {
-		sig := <-signalChan
-		fmt.Println(sig)
-		done <- true
+		for {
+			sig := <-signalChan
+			fmt.Println(sig)
+			switch sig {
+			case syscall.SIGTERM,
+				syscall.SIGQUIT:
+				done <- true
+			case syscall.SIGHUP:
+				fmt.Println("handling SIGHUP")
+			}
+		}
 	}()
 
 	fmt.Println("awaiting signal")
